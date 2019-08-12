@@ -5,7 +5,7 @@ fn main(){
     use quick_xml::events::Event;
 
     let file_path = "/Users/phillipshreves/AltDesktop/Developer Documents/xml_parsing/xml_test.xml";
-    let mut reader = Reader::from_file(file_path);
+    let mut reader = Reader::from_file(file_path).unwrap();
     reader.trim_text(true);
 
     let mut count = 0;
