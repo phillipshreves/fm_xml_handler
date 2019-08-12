@@ -1,0 +1,7 @@
+[package]
+name = "xml_handler"
+version = "0.1.0"
+authors = ["Phillip Shreves <pshreves@highpointgo.com>"]
+edition = "2018"
+
+[dependencies]
