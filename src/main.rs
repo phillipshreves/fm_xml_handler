@@ -1,14 +1,11 @@
-use quick_xml::Reader;
-use quick_xml::events::Event;
-use std::io::Read;
+extern crate quick_xml;
 
 fn main(){
-    let file = std::fs::File::open("/Users/phillipshreves/AltDesktop/Developer Documents/xml_parsing/xml_to_parse.xml");
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).unwrap();
-    let xml = contents;
+    use quick_xml::Reader;
+    use quick_xml::events::Event;
 
-    let mut reader = Reader::from_str(xml);
+    let file_path = "/Users/phillipshreves/AltDesktop/Developer Documents/xml_parsing/xml_test.xml";
+    let mut reader = Reader::from_file(file_path);
     reader.trim_text(true);
 
     let mut count = 0;
