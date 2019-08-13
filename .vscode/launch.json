@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "${workspaceRoot}/target/debug/${workspaceRootFolderName}",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=xml_handler",
+                    "--package=xml_handler"
+                ],
+                "filter": {
+                    "name": "xml_handler",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name":"${workspaceRoot}/target/debug/${workspaceRootFolderName}",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=xml_handler",
+                    "--package=xml_handler"
+                ],
+                "filter": {
+                    "name": "xml_handler",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
