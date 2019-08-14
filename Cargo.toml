@@ -5,4 +5,4 @@ authors = ["Phillip Shreves <pshreves@highpointgo.com>"]
 edition = "2018"
 
 [dependencies]
-quick-xml = "0.15.0"
+minidom = "0.11.0"
