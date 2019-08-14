@@ -37,6 +37,7 @@ fn main() {
     let record_hashmap = record_data_hashmap(filepath, record_hashmap);
     let filepath = String::from("/Users/phillipshreves/Desktop/export_contactdetails.xml");
     let record_hashmap = record_data_hashmap(filepath, record_hashmap);
+    println!("{:#?}", record_hashmap);
 
        // The fields vector will contain all of the metadata for the fields in order so that when we pull them later we can line them up with the data
     let mut fields: Vec<Field> = Vec::new();
@@ -47,8 +48,10 @@ fn main() {
         field_type: String::from("NUMBER"),
     };
     fields.push(field_example);
+    let filepath = String::from("/Users/phillipshreves/Desktop/export_contactdetails.xml");
+    let fields_test = field_metadata(filepath, fields);
 
-    println!("{:#?}", record_hashmap);
+
     return ;
 }
 
@@ -78,7 +81,7 @@ fn record_data_hashmap(xml_filepath: String, mut record_hashmap: HashMap<String,
 }
 
 
-fn field_metadata(xml_filepath: String, mut field_vec: Vec<String>) -> Vec<String>{
+fn field_metadata(xml_filepath: String, mut field_vec: Vec<Field>) -> Vec<Field>{
  
     let xml = fs::read_to_string(xml_filepath).expect("file error");
     // The records hashmap will contain the records using the primary key from the table, and then holding the field data in a vector for each
@@ -87,7 +90,9 @@ fn field_metadata(xml_filepath: String, mut field_vec: Vec<String>) -> Vec<Strin
     for table in root.children() {
         if table.name() == "METADATA" {
             for field in table.children() {
-                
+                for attribute in field.attrs() {
+                    println!("{:#?}", attribute)
+                }
             }
         }
     }
