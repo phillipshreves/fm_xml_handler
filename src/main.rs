@@ -32,6 +32,7 @@ pub struct Field {
 
 fn main() {
     let record_hashmap = HashMap::new();
+    let fields = Vec::new();
 
     let filepath = String::from("/Users/phillipshreves/Desktop/export_contacts.xml");
     let record_hashmap = record_data_hashmap(filepath, record_hashmap);
@@ -39,17 +40,9 @@ fn main() {
     let record_hashmap = record_data_hashmap(filepath, record_hashmap);
     println!("{:#?}", record_hashmap);
 
-       // The fields vector will contain all of the metadata for the fields in order so that when we pull them later we can line them up with the data
-    let mut fields: Vec<Field> = Vec::new();
-    let field_example = Field {
-        empty_ok: String::from("YES"),
-        max_repeat: String::from("1"),
-        name: String::from("ID_Contact"),
-        field_type: String::from("NUMBER"),
-    };
-    fields.push(field_example);
+    
     let filepath = String::from("/Users/phillipshreves/Desktop/export_contactdetails.xml");
-    let fields_test = field_metadata(filepath, fields);
+    let fields = field_metadata(filepath, fields);
 
 
     return ;
@@ -81,21 +74,33 @@ fn record_data_hashmap(xml_filepath: String, mut record_hashmap: HashMap<String,
 }
 
 
-fn field_metadata(xml_filepath: String, mut field_vec: Vec<Field>) -> Vec<Field>{
+fn field_metadata(xml_filepath: String, mut fields: Vec<Field>) -> Vec<Field>{
  
     let xml = fs::read_to_string(xml_filepath).expect("file error");
-    // The records hashmap will contain the records using the primary key from the table, and then holding the field data in a vector for each
+       // The fields vector will contain all of the metadata for the fields in order so that when we pull them later we can line them up with the data
+    let mut fields: Vec<Field> = Vec::new();
+    let field_example = Field {
+        empty_ok: String::from("YES"),
+        max_repeat: String::from("1"),
+        name: String::from("ID_Contact"),
+        field_type: String::from("NUMBER"),
+    };
+    fields.push(field_example);
 
     let root: Element = xml.parse().unwrap();
     for table in root.children() {
         if table.name() == "METADATA" {
             for field in table.children() {
                 for attribute in field.attrs() {
-                    println!("{:#?}", attribute)
+                    /*match attribute.0 {
+                       "EMPTYOK" => fields.empty_ok
+                        _ => 
+                    }*/
+                    println!("{:#?}, {:#?}", attribute.0, attribute.1)
                 }
             }
         }
     }
 
-    field_vec
+    fields
 }
