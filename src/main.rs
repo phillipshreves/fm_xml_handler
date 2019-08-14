@@ -36,6 +36,13 @@ fn main() {
 
     // The fields vector will contain all of the metadata for the fields in order so that when we pull them later we can line them up with the data
     let mut fields: Vec<Field> = Vec::new();
+    let field_example = Field {
+        empty_ok: String::from("YES"),
+        max_repeat: String::from("1"),
+        name: String::from("ID_Contact"),
+        field_type: String::from("NUMBER"),
+    };
+    fields.push(field_example);
     // The records hashmap will contain the records using the primary key from the table, and then holding the field data in a vector for each
     let mut records = HashMap::new();
 
@@ -50,8 +57,8 @@ fn main() {
                         record_data.push(data);
                     }
                 }
-                let record_id = &record_data;
-                records.entry("test").or_insert(record_data);
+                let record_id = record_data[0].clone();
+                records.entry(record_id).or_insert(record_data);
             }
         }
     }
