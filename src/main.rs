@@ -31,10 +31,14 @@ pub struct Field {
 }
 
 fn main() {
-    let filepath = "/Users/phillipshreves/Desktop/xml_test.xml";
-    let xml = fs::read_to_string(filepath).expect("file error");
+    let record_hashmap = HashMap::new();
 
-    // The fields vector will contain all of the metadata for the fields in order so that when we pull them later we can line them up with the data
+    let filepath = String::from("/Users/phillipshreves/Desktop/export_contacts.xml");
+    let record_hashmap = record_data_hashmap(filepath, record_hashmap);
+    let filepath = String::from("/Users/phillipshreves/Desktop/export_contactdetails.xml");
+    let record_hashmap = record_data_hashmap(filepath, record_hashmap);
+
+       // The fields vector will contain all of the metadata for the fields in order so that when we pull them later we can line them up with the data
     let mut fields: Vec<Field> = Vec::new();
     let field_example = Field {
         empty_ok: String::from("YES"),
@@ -43,8 +47,15 @@ fn main() {
         field_type: String::from("NUMBER"),
     };
     fields.push(field_example);
+
+    println!("{:#?}", record_hashmap);
+    return ;
+}
+
+fn record_data_hashmap(xml_filepath: String, mut record_hashmap: HashMap<String, Vec<String>>) -> HashMap<String, Vec<String>>{
+ 
+    let xml = fs::read_to_string(xml_filepath).expect("file error");
     // The records hashmap will contain the records using the primary key from the table, and then holding the field data in a vector for each
-    let mut records = HashMap::new();
 
     let root: Element = xml.parse().unwrap();
     for table in root.children() {
@@ -58,11 +69,28 @@ fn main() {
                     }
                 }
                 let record_id = record_data[0].clone();
-                records.entry(record_id).or_insert(record_data);
+                record_hashmap.entry(record_id).or_insert(record_data);
             }
         }
     }
 
-    println!("{:#?}", records);
-    return ;
+    record_hashmap
+}
+
+
+fn field_metadata(xml_filepath: String, mut field_vec: Vec<String>) -> Vec<String>{
+ 
+    let xml = fs::read_to_string(xml_filepath).expect("file error");
+    // The records hashmap will contain the records using the primary key from the table, and then holding the field data in a vector for each
+
+    let root: Element = xml.parse().unwrap();
+    for table in root.children() {
+        if table.name() == "METADATA" {
+            for field in table.children() {
+                
+            }
+        }
+    }
+
+    field_vec
 }
