@@ -33,12 +33,15 @@ pub struct Field {
 fn main() {
     let record_hashmap = HashMap::new();
     let fields = Vec::new();
+    
+    //let file_names = vec!["export_contacts.xml","export_contactdetails.xml" ];
 
-    let filepath = String::from("/Users/phillipshreves/Desktop/export_contacts.xml");
+    let export_folder = "/Users/phillipshreves/Desktop/";
+    let filepath = String::from([export_folder,"export_contacts.xml"].concat());
     let record_hashmap = record_data_hashmap(filepath, record_hashmap);
-    let filepath = String::from("/Users/phillipshreves/Desktop/export_contactdetails.xml");
-    let record_hashmap = record_data_hashmap(filepath, record_hashmap);
-    println!("{:#?}", record_hashmap);
+    //let filepath = String::from([export_folder,"export_contactdetails.xml"].concat());
+    //let record_hashmap = record_data_hashmap(filepath, record_hashmap);
+    println!("{:#?}", record_hashmap["19991"]);
 
     
     let filepath = String::from("/Users/phillipshreves/Desktop/export_contactdetails.xml");
@@ -65,7 +68,9 @@ fn record_data_hashmap(xml_filepath: String, mut record_hashmap: HashMap<String,
                     }
                 }
                 let record_id = record_data[0].clone();
-                record_hashmap.entry(record_id).or_insert(record_data);
+                let mut record_vec = record_hashmap[&record_id].clone();
+                record_vec.extend(record_data);
+                record_hashmap.insert(record_id,record_vec);
             }
         }
     }
@@ -96,7 +101,7 @@ fn field_metadata(xml_filepath: String, mut fields: Vec<Field>) -> Vec<Field>{
                        "EMPTYOK" => fields.push(),
                         _ => 
                     }*/
-                    println!("{:#?}, {:#?}", attribute.0, attribute.1)
+                    //println!("{:#?}, {:#?}", attribute.0, attribute.1)
                 }
             }
         }
