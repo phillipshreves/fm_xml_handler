@@ -12,7 +12,7 @@ pub struct Field {
     field_type: String,
 }
 
-fn main() {
+fn main() -> std::io::Result<()> {
     let mut record_hashmap = HashMap::new();
     let mut fields = Vec::new();
 
@@ -22,7 +22,7 @@ fn main() {
     let mut counter_tables = 0;
     record_hashmap = loop {
         let table_name = &table_names[counter_tables];
-        let filepath = String::from([&export_folder,"export_", table_name, ".xml"].concat());
+        let filepath = String::from([&export_folder, "export_", table_name, ".xml"].concat());
 
         record_hashmap = update_record_hashmap(&filepath, record_hashmap);
 
@@ -45,12 +45,27 @@ fn main() {
         }
     };
 
+    //Example Results:
     //println!("{:#?}", record_hashmap["19991"]);
     //println!("{:#?}", fields[0]);
     //println!("{:#?}", xml_field_metadata(fields));
-    xml_record_data(record_hashmap);
+    //println!("{}", xml_record_data(record_hashmap));
 
-    return;
+    let xml_to_write = format!("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+<FMPXMLRESULT xmlns=\"http://www.filemaker.com/fmpxmlresult\">
+    <ERRORCODE>0</ERRORCODE>
+    <PRODUCT BUILD=\"07-05-2019\" NAME=\"FileMaker\" VERSION=\"ProAdvanced 18.0.2\"/>
+    <DATABASE DATEFORMAT=\"M/d/yyyy\" LAYOUT=\"\" NAME=\"TM_Dev.fmp12\" RECORDS=\"53757\" TIMEFORMAT=\"h:mm:ss a\"/>
+    <METADATA>
+    {}
+    </METADATA>
+    <RESULTSET>
+    {}
+    </RESULTSET>
+</FMPXMLRESULT>", xml_field_metadata(fields), xml_record_data(record_hashmap)) ;
+
+    fs::write(format!("{}import_test.xml", export_folder), xml_to_write)?;
+    Ok(())
 }
 
 fn field_metadata(
@@ -134,23 +149,30 @@ fn update_record_hashmap(
     record_hashmap
 }
 
-fn xml_field_metadata (field_vector: Vec<Field>) -> String {
-
+fn xml_field_metadata(field_vector: Vec<Field>) -> String {
+    //This sets up the XML which determines what field contains the data found in xml_record_data
     let mut xml = String::new();
 
     for field in &field_vector {
-        xml = format!("{}<FIELD EMPTYOK=\"{}\" MAXREPEAT=\"{}\" NAME\"{}\" TYPE=\"{}\"/>", xml, field.empty_ok, field.max_repeat, field.name, field.field_type);
+        xml = format!(
+            "{}<FIELD EMPTYOK=\"{}\" MAXREPEAT=\"{}\" NAME\"{}\" TYPE=\"{}\"/>",
+            xml, field.empty_ok, field.max_repeat, field.name, field.field_type
+        );
     }
 
     xml
 }
 
-fn xml_record_data ( record_data: HashMap<String, Vec<String>>) -> String {
-
+fn xml_record_data(record_data: HashMap<String, Vec<String>>) -> String {
+    //This sets up the XML for the record data
     let mut xml = String::new();
-    
-    for record in record_data.values(){
-        println!("{:#?}", record);
+
+    for record in record_data.values() {
+        let mut record_values = String::new();
+        for value in record {
+            record_values = format!("{}<COL><DATA>{}</DATA></COL>", record_values, value);
+        }
+        xml = format!("{}<ROW>{}</ROW>", xml, record_values)
     }
 
     xml
