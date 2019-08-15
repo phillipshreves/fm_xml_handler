@@ -12,7 +12,14 @@ pub struct Field {
     field_type: String,
 }
 
+static AMPERSAND: u8 = '&' as u8;
+static LESS_THAN: u8 = '<' as u8;
+static GREATER_THAN: u8 = '>' as u8;
+static QUOTE_DOUBLE: u8 = '\"' as u8;
+static QUOTE_SINGLE: u8 = '\'' as u8;
+
 fn main() -> std::io::Result<()> {
+
     let mut record_hashmap = HashMap::new();
     let mut fields = Vec::new();
 
@@ -68,13 +75,48 @@ fn main() -> std::io::Result<()> {
     Ok(())
 }
 
+fn escape_xml(data: String) -> String {
+    let mut escape_characters = false;
+    if data.contains("&")
+        | data.contains("<")
+        | data.contains(">")
+        | data.contains("\"")
+        | data.contains("\'")
+    {
+        escape_characters = true;
+    };
+    if !escape_characters {
+        return data;
+    }
+
+    let mut data_escaped = String::new();
+    for character in data.chars(){
+        let char_u8 = character as u8 ;
+        let mut character_escaped = character.to_string();
+        if char_u8 == AMPERSAND {
+            character_escaped = "&amp;".to_string();
+        } else if char_u8 == LESS_THAN {
+            character_escaped = "&lt;".to_string();
+        } else if char_u8 == GREATER_THAN {
+            character_escaped = "&gt;".to_string();
+        } else if char_u8 == QUOTE_DOUBLE {
+            character_escaped = "&quot;".to_string();
+        } else if char_u8 == QUOTE_SINGLE {
+            character_escaped = "&apos;".to_string();
+        };
+        // Need to update this to concat a string instead of a char
+        //data_escaped.push(character_escaped)
+    };
+
+    return data;
+}
+
 fn field_metadata(
     xml_filepath: &String,
     table_name: &String,
     mut fields: Vec<Field>,
 ) -> Vec<Field> {
-    // The fields vector will contain all of the metadata for the fields in order so that when we pull them later we can line them up with the data
-    /*
+    // The fields vector will contain all of the metadata for the fields in order so that when we pull them later we can line them up with the data /*
     let field_example = Field {
         empty_ok: String::from("YES"),
         max_repeat: String::from("1"),
@@ -82,7 +124,6 @@ fn field_metadata(
         field_type: String::from("NUMBER"),
     };
     fields.push(field_example);
-    */
     let xml = fs::read_to_string(xml_filepath).expect("file error");
 
     let root: Element = xml.parse().unwrap();
@@ -131,7 +172,8 @@ fn update_record_hashmap(
                 let mut record_data = Vec::new();
                 for field in record.children() {
                     for value in field.children() {
-                        let data = value.text();
+                        let mut data = value.text();
+                        data = escape_xml(data);
                         record_data.push(data);
                     }
                 }
