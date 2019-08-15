@@ -1,26 +1,8 @@
 extern crate minidom;
 
-use std::fs;
-use std::collections::HashMap;
 use minidom::Element;
-
-
-/*
-const DATA: &'static str = r#"<articles xmlns="article">
-    <article>
-        <title>10 Terrible Bugs You Would NEVER Believe Happened</title>
-        <body>
-            Rust fixed them all. &lt;3
-        </body>
-    </article>
-    <article>
-        <title>BREAKING NEWS: Physical Bug Jumps Out Of Programmer's Screen</title>
-        <body>
-            Just kidding!
-        </body>
-    </article>
-</articles>"#;
-*/
+use std::collections::HashMap;
+use std::fs;
 
 #[derive(Debug)]
 pub struct Field {
@@ -31,30 +13,101 @@ pub struct Field {
 }
 
 fn main() {
-    let record_hashmap = HashMap::new();
-    let fields = Vec::new();
-    
-    //let file_names = vec!["export_contacts.xml","export_contactdetails.xml" ];
+    let mut record_hashmap = HashMap::new();
+    let mut fields = Vec::new();
 
-    let export_folder = "/Users/phillipshreves/Desktop/";
-    let filepath = String::from([export_folder,"export_contacts.xml"].concat());
-    let record_hashmap = record_data_hashmap(filepath, record_hashmap);
-    //let filepath = String::from([export_folder,"export_contactdetails.xml"].concat());
-    //let record_hashmap = record_data_hashmap(filepath, record_hashmap);
-    println!("{:#?}", record_hashmap["19991"]);
+    let table_names = vec![String::from("contacts"), String::from("contactdetails")];
+    let export_folder = String::from("/Users/phillipshreves/Desktop/");
 
-    
-    let filepath = String::from("/Users/phillipshreves/Desktop/export_contactdetails.xml");
-    let fields = field_metadata(filepath, fields);
+    let mut counter_tables = 0;
+    record_hashmap = loop {
+        let table_name = &table_names[counter_tables];
+        let filepath = String::from([&export_folder,"export_", table_name, ".xml"].concat());
 
+        record_hashmap = update_record_hashmap(&filepath, record_hashmap);
 
-    return ;
+        counter_tables += 1;
+        if counter_tables >= table_names.len() {
+            break record_hashmap;
+        }
+    };
+
+    let mut counter_tables = 0;
+    fields = loop {
+        let table_name = &table_names[counter_tables];
+        let filepath = String::from([&export_folder, "export_", &table_name, ".xml"].concat());
+
+        fields = field_metadata(&filepath, &table_name, fields);
+
+        counter_tables += 1;
+        if counter_tables >= table_names.len() {
+            break fields;
+        }
+    };
+
+    //println!("{:#?}", record_hashmap["19991"]);
+    //println!("{:#?}", fields[0]);
+    //println!("{:#?}", xml_field_metadata(fields));
+    xml_record_data(record_hashmap);
+
+    return;
 }
 
-fn record_data_hashmap(xml_filepath: String, mut record_hashmap: HashMap<String, Vec<String>>) -> HashMap<String, Vec<String>>{
- 
+fn field_metadata(
+    xml_filepath: &String,
+    table_name: &String,
+    mut fields: Vec<Field>,
+) -> Vec<Field> {
+    // The fields vector will contain all of the metadata for the fields in order so that when we pull them later we can line them up with the data
+    /*
+    let field_example = Field {
+        empty_ok: String::from("YES"),
+        max_repeat: String::from("1"),
+        name: String::from("ID_Contact"),
+        field_type: String::from("NUMBER"),
+    };
+    fields.push(field_example);
+    */
     let xml = fs::read_to_string(xml_filepath).expect("file error");
+
+    let root: Element = xml.parse().unwrap();
+    for table in root.children() {
+        if table.name() == "METADATA" {
+            for field in table.children() {
+                let mut field_structure = Field {
+                    empty_ok: String::new(),
+                    field_type: String::new(),
+                    max_repeat: String::new(),
+                    name: String::new(),
+                };
+                for attribute in field.attrs() {
+                    let a_name = attribute.0;
+                    let a_value = attribute.1;
+                    match a_name {
+                        "EMPTYOK" => field_structure.empty_ok = String::from(a_value),
+                        "MAXREPEAT" => field_structure.max_repeat = String::from(a_value),
+                        "NAME" => {
+                            field_structure.name =
+                                String::from([table_name, "__", a_value].concat())
+                        }
+                        "TYPE" => field_structure.field_type = String::from(a_value),
+                        _ => (),
+                    }
+                }
+                fields.push(field_structure);
+            }
+        }
+    }
+
+    fields
+}
+
+fn update_record_hashmap(
+    xml_filepath: &String,
+    mut record_hashmap: HashMap<String, Vec<String>>,
+) -> HashMap<String, Vec<String>> {
     // The records hashmap will contain the records using the primary key from the table, and then holding the field data in a vector for each
+    let xml = fs::read_to_string(xml_filepath).expect("file error");
 
     let root: Element = xml.parse().unwrap();
     for table in root.children() {
@@ -68,9 +121,12 @@ fn record_data_hashmap(xml_filepath: String, mut record_hashmap: HashMap<String,
                     }
                 }
                 let record_id = record_data[0].clone();
-                let mut record_vec = record_hashmap[&record_id].clone();
+                let mut record_vec = Vec::new();
+                if record_hashmap.contains_key(&record_id) {
+                    record_vec.extend(record_hashmap[&record_id].clone());
+                };
                 record_vec.extend(record_data);
-                record_hashmap.insert(record_id,record_vec);
+                record_hashmap.insert(record_id, record_vec);
             }
         }
     }
@@ -78,34 +134,24 @@ fn record_data_hashmap(xml_filepath: String, mut record_hashmap: HashMap<String,
     record_hashmap
 }
 
+fn xml_field_metadata (field_vector: Vec<Field>) -> String {
 
-fn field_metadata(xml_filepath: String, mut fields: Vec<Field>) -> Vec<Field>{
- 
-    let xml = fs::read_to_string(xml_filepath).expect("file error");
-       // The fields vector will contain all of the metadata for the fields in order so that when we pull them later we can line them up with the data
-    let mut fields: Vec<Field> = Vec::new();
-    let field_example = Field {
-        empty_ok: String::from("YES"),
-        max_repeat: String::from("1"),
-        name: String::from("ID_Contact"),
-        field_type: String::from("NUMBER"),
-    };
-    fields.push(field_example);
+    let mut xml = String::new();
 
-    let root: Element = xml.parse().unwrap();
-    for table in root.children() {
-        if table.name() == "METADATA" {
-            for field in table.children() {
-                for attribute in field.attrs() {
-                    /*match attribute.0 {
-                       "EMPTYOK" => fields.push(),
-                        _ => 
-                    }*/
-                    //println!("{:#?}, {:#?}", attribute.0, attribute.1)
-                }
-            }
-        }
+    for field in &field_vector {
+        xml = format!("{}<FIELD EMPTYOK=\"{}\" MAXREPEAT=\"{}\" NAME\"{}\" TYPE=\"{}\"/>", xml, field.empty_ok, field.max_repeat, field.name, field.field_type);
     }
 
-    fields
+    xml
+}
+
+fn xml_record_data ( record_data: HashMap<String, Vec<String>>) -> String {
+
+    let mut xml = String::new();
+    
+    for record in record_data.values(){
+        println!("{:#?}", record);
+    }
+
+    xml
 }
