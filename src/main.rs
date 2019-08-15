@@ -16,7 +16,7 @@ fn main() -> std::io::Result<()> {
     let mut record_hashmap = HashMap::new();
     let mut fields = Vec::new();
 
-    let table_names = vec![String::from("contacts"), String::from("contactdetails")];
+    let table_names = vec![String::from("Contacts"), String::from("ContactDetails")];
     let export_folder = String::from("/Users/phillipshreves/Desktop/");
 
     let mut counter_tables = 0;
@@ -155,7 +155,7 @@ fn xml_field_metadata(field_vector: Vec<Field>) -> String {
 
     for field in &field_vector {
         xml = format!(
-            "{}<FIELD EMPTYOK=\"{}\" MAXREPEAT=\"{}\" NAME\"{}\" TYPE=\"{}\"/>",
+            "{}<FIELD EMPTYOK=\"{}\" MAXREPEAT=\"{}\" NAME=\"{}\" TYPE=\"{}\"/>",
             xml, field.empty_ok, field.max_repeat, field.name, field.field_type
         );
     }
