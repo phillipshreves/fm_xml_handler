@@ -3,6 +3,7 @@ extern crate minidom;
 use minidom::Element;
 use std::collections::HashMap;
 use std::fs;
+use std::env;
 
 #[derive(Debug)]
 pub struct Field {
@@ -18,9 +19,13 @@ static QUOTE_DOUBLE: u8 = '\"' as u8;
 static QUOTE_SINGLE: u8 = '\'' as u8;
 
 fn main() -> std::io::Result<()> {
-//These parameters need to be changed at runtime
-    let table_names = vec![String::from("Contacts"), String::from("ContactDetails")];
-    let export_folder = String::from("/Users/phillipshreves/Desktop/");
+//These parameters are set at runtime through arguments
+    //Argument 1 - export folder - "/Users/phillipshreves/Desktop/"
+    //Argument 2 - table names - "Contacts|ContactDetails"
+    let arguments: Vec<String> = env::args().collect();
+    let export_folder = &arguments[1];
+    let table_names_arg = &arguments[2];
+    let table_names: Vec<&str> = table_names_arg.as_str().split('|').collect();
 
 //Variable setup
     let mut record_hashmap = HashMap::new();
@@ -30,7 +35,7 @@ fn main() -> std::io::Result<()> {
     let mut counter_tables = 0;
     record_hashmap = loop {
         let table_name = &table_names[counter_tables];
-        let filepath = String::from([&export_folder, "export_", table_name, ".xml"].concat());
+        let filepath = String::from([&export_folder, "exported_", table_name, ".xml"].concat());
 
         record_hashmap = update_record_hashmap(&filepath, record_hashmap);
 
@@ -43,8 +48,8 @@ fn main() -> std::io::Result<()> {
 //Now we get the field metadata, parse it out, and build the xml
     let mut counter_tables = 0;
     fields = loop {
-        let table_name = &table_names[counter_tables];
-        let filepath = String::from([&export_folder, "export_", &table_name, ".xml"].concat());
+        let table_name = String::from(table_names[counter_tables]);
+        let filepath = String::from([&export_folder, "exported_", &table_name, ".xml"].concat());
 
         fields = field_metadata(&filepath, &table_name, fields);
 
@@ -66,7 +71,7 @@ fn main() -> std::io::Result<()> {
 </FMPXMLRESULT>", xml_field_metadata(fields), xml_record_data(record_hashmap)) ;
 
 //Write XML to file
-    fs::write(format!("{}import_test.xml", export_folder), xml_to_write)?;
+    fs::write(format!("{}data_to_import.xml", export_folder), xml_to_write)?;
     Ok(())
 }
 
