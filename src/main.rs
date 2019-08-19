@@ -34,8 +34,8 @@ fn main() -> std::io::Result<()> {
 //Now we get the record data, parse it out, and build the xml
     let mut counter_tables = 0;
     record_hashmap = loop {
-        let table_name = &table_names[counter_tables];
-        let filepath = String::from([&export_folder, "exported_", table_name, ".xml"].concat());
+        let table_name = String::from(table_names[counter_tables]);
+        let filepath = format!("{}{}{}", &export_folder, &table_name, ".xml");
 
         record_hashmap = update_record_hashmap(&filepath, record_hashmap);
 
@@ -49,7 +49,7 @@ fn main() -> std::io::Result<()> {
     let mut counter_tables = 0;
     fields = loop {
         let table_name = String::from(table_names[counter_tables]);
-        let filepath = String::from([&export_folder, "exported_", &table_name, ".xml"].concat());
+        let filepath = format!("{}{}{}", &export_folder, &table_name, ".xml");
 
         fields = field_metadata(&filepath, &table_name, fields);
 
