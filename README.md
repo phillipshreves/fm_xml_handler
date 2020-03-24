@@ -1,4 +1,4 @@
-# fm_xml_handler
+# FM XML Handler
 
 ## Purpose
 An XML parser that is intended to be used in conjuction with a FileMaker Pro database. It processes database records in the XML format "FMPXMLRESULT" to combine multiple tables into one XML file which can then be used in a single Import Records script step in FileMaker. 
